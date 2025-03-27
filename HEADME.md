@@ -30,7 +30,7 @@ Clone the repository using Git:
 
 ```bash
 
-git clone https://github.com/your-username/ensurancequote.git
+git clone https://github.com/guilhermevargas/ensurancequote.git
 cd ensurancequote
 ```
 
@@ -64,6 +64,7 @@ This command will build your application image, start all services, and expose t
 
 Send a POST request to create a new quote. For example, using curl:
 
+**If you want create more quotes just change the document_number**
 ```bash
 
 curl -X POST "http://localhost:8080/quotes" \
