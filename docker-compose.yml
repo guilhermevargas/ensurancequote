@@ -1,0 +1,65 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ensurancequote
+      POSTGRES_USER: ensurance
+      POSTGRES_PASSWORD: ensurance
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  catalog-mock:
+    image: wiremock/wiremock:latest
+    container_name: catalog-mock
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+
+  ensurancequote:
+    build: .
+    container_name: ensurancequote
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ensurancequote
+      SPRING_DATASOURCE_USERNAME: ensurance
+      SPRING_DATASOURCE_PASSWORD: ensurance
+      CATALOG_SERVICE_URL: http://catalog-mock:8080
+      QUOTE_RECEIVED_TOPIC: quote-received-topic
+      POLICY_ISSUED_TOPIC: policy-issued-topic
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+      - catalog-mock
+
+volumes:
+  pgdata:
