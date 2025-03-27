@@ -1,63 +1,53 @@
-package br.com.itau.ensurancequote.services;
+package br.com.itau.ensurancequote.domains.services;
 
 import br.com.itau.ensurancequote.domains.exceptions.QuoteValidationException;
 import br.com.itau.ensurancequote.domains.models.Offer;
 import br.com.itau.ensurancequote.domains.models.Product;
 import br.com.itau.ensurancequote.domains.models.Quote;
-import br.com.itau.ensurancequote.domains.services.TotalCoverageAmountValidationRule;
+import br.com.itau.ensurancequote.domains.services.AssistancesValidationRule;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
-class TotalCoverageAmountValidationRuleTest {
+class AssistancesValidationRuleTest {
 
     @Test
-    void shouldThrowWhenCoverageSumDoesNotMatchTotalCoverageAmount() {
-        TotalCoverageAmountValidationRule rule = new TotalCoverageAmountValidationRule();
-        Quote quote = createQuote(
-                Map.of("Incendio", BigDecimal.valueOf(100), "RCivil", BigDecimal.valueOf(50)),
-                BigDecimal.valueOf(200)
-        );
+    void shouldThrowWhenAssistanceNotInOffer() {
+        AssistancesValidationRule rule = new AssistancesValidationRule();
+        Quote quote = createQuote(List.of("InvalidAssist"));
         Product product = createProduct(List.of("offer1"));
-        Offer offer = createOffer();
+        Offer offer = createOffer(List.of("ValidAssist"));
         assertThrows(QuoteValidationException.class, () -> rule.validate(quote, product, offer));
     }
-
     @Test
-    void shouldNotThrowWhenCoverageSumMatchesTotalCoverageAmount() {
-        TotalCoverageAmountValidationRule rule = new TotalCoverageAmountValidationRule();
-        Quote quote = createQuote(
-                Map.of("Incendio", BigDecimal.valueOf(100), "RCivil", BigDecimal.valueOf(100)),
-                BigDecimal.valueOf(200)
-        );
+    void shouldNotThrowWhenAllAssistancesAreValid() {
+        AssistancesValidationRule rule = new AssistancesValidationRule();
+        Quote quote = createQuote(List.of("Assist1", "Assist2"));
         Product product = createProduct(List.of("offer1"));
-        Offer offer = createOffer();
+        Offer offer = createOffer(List.of("Assist1", "Assist2", "Assist3"));
         assertDoesNotThrow(() -> rule.validate(quote, product, offer));
     }
 
-    private Quote createQuote(Map<String, BigDecimal> coverages, BigDecimal totalCoverageAmount) {
+    private Quote createQuote(List<String> assistances) {
         return new Quote(
                 null,
                 null,
                 null,
                 null,
                 null,
-                totalCoverageAmount,
-                coverages,
                 null,
+                null,
+                assistances,
                 null,
                 null,
                 null,
                 null
         );
     }
-
     private Product createProduct(List<String> offers) {
         return new Product(
                 "p1",
@@ -67,8 +57,7 @@ class TotalCoverageAmountValidationRuleTest {
                 offers
         );
     }
-
-    private Offer createOffer() {
+    private Offer createOffer(List<String> assistances) {
         return new Offer(
                 "offer1",
                 "p1",
@@ -76,9 +65,8 @@ class TotalCoverageAmountValidationRuleTest {
                 LocalDateTime.now(),
                 true,
                 Map.of(),
-                List.of(),
+                assistances,
                 null
         );
     }
-
 }
