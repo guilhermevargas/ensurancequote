@@ -76,14 +76,14 @@ curl -X POST "http://localhost:8080/quotes" \
     "total_monthly_premium_amount": 75.25,
     "total_coverage_amount": 825000.00,
     "coverages": {
-      "incêndio": 250000.00,
-      "desastres_naturais": 500000.00,
-      "responsabiliadade_civil": 75000.00
+      "Incêndio": 250000.00,
+      "Desastres naturais": 500000.00,
+      "Responsabiliadade civil": 75000.00
     },
     "assistances": [
-      "encanador",
-      "eletricista",
-      "chaveiro_24h"
+      "Encanador",
+      "Eletricista",
+      "Chaveiro 24h"
     ],
     "customer": {
       "document_number": "36205578900",
